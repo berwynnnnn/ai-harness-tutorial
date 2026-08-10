@@ -3,7 +3,7 @@
 > **不写一行代码，看懂所有 AI Agent 产品的底层逻辑。**
 > 面向产品经理、运营和所有非工程背景的 AI 从业者。
 
-📖 **在线阅读：[https://你的用户名.github.io/ai-harness-tutorial/](#)（GitHub Pages，发布后替换此链接）**
+📖 **在线阅读：[https://berwynnnnn.github.io/ai-harness-tutorial/]（GitHub Pages，发布后替换此链接）**
 
 ![lessons](https://img.shields.io/badge/课程-7%20节%20+%20案例课-b3541e) ![products](https://img.shields.io/badge/解剖产品-10%20款-1a1a18) ![quiz](https://img.shields.io/badge/测验-24%20道即时反馈-2f6b3a) ![license](https://img.shields.io/badge/license-MIT-d8d4c8)
 
