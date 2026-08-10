@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · Agent 评估</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="lesson-head">
+  <div class="course">Reference · 速查卡</div>
+  <h1>Agent 评估速查卡</h1>
+  <p class="lede">压缩自<a href="../lessons/0004-agent-evaluation.html">第 04 课</a>。日常查阅用，可打印。</p>
+</header>
+
+<h2>核心口诀</h2>
+<pre>评结果（Outcome），别只听 Agent 说什么（Transcript）
+能用代码判的，别用模型判；没有评估的团队在"盲飞"</pre>
+
+<h2>七个术语</h2>
+<table>
+  <tr><td>Task 任务</td><td>有明确输入+成功标准的一个测试</td></tr>
+  <tr><td>Trial 尝试</td><td>对一个任务的一次执行（要多跑）</td></tr>
+  <tr><td>Grader 评分器</td><td>给表现某方面打分的逻辑</td></tr>
+  <tr><td>Transcript 轨迹</td><td>一次尝试的完整记录</td></tr>
+  <tr><td>Outcome 结果</td><td>环境的真实最终状态</td></tr>
+  <tr><td>Suite 套件</td><td>围绕同一能力目标的一组任务</td></tr>
+  <tr><td>Eval harness</td><td>端到端跑评估的基础设施</td></tr>
+</table>
+
+<h2>三种评分器</h2>
+<table>
+  <tr><th>类型</th><th>特点</th><th>用法</th></tr>
+  <tr><td>代码</td><td>快/便宜/客观，但死板</td><td>首选</td></tr>
+  <tr><td>模型（LLM judge）</td><td>灵活，需校准</td><td>开放性任务；给它"可答不知道"的退路</td></tr>
+  <tr><td>人工</td><td>金标准，贵且慢</td><td>校准模型评分器、抽查</td></tr>
+</table>
+
+<h2>两套评估</h2>
+<p>能力评估：通过率故意从低 → 爬山的信号 → 高分后"毕业"进回归套件。<br>回归评估：预期 ≈100%，下降即报警。</p>
+
+<h2>不确定性指标</h2>
+<table>
+  <tr><th>指标</th><th>含义</th><th>场景</th></tr>
+  <tr><td>pass@k</td><td>k 次至少成一次；k↑ 分↑</td><td>批处理/内部工具</td></tr>
+  <tr><td>pass^k</td><td>k 次全部成功；k↑ 分↓（0.75³≈42%）</td><td>面向用户的功能</td></tr>
+</table>
+
+<h2>路线图精华</h2>
+<ol>
+  <li>尽早：20-50 个来自真实失败的任务</li>
+  <li>取材：手工测试 + bug 清单</li>
+  <li>任务无歧义：两位专家独立判断结论一致</li>
+  <li>评结果不评路径，别锁死工具调用顺序</li>
+  <li>部分得分体现连续谱</li>
+  <li>防作弊：通过只能靠真解决</li>
+  <li>读轨迹！没读过轨迹前不轻信分数</li>
+  <li>防饱和：100% 通过率的评估该换难题</li>
+</ol>
+
+<h2>多层防线（瑞士奶酪）</h2>
+<p>自动化评估（上线前）+ 生产监控 + A/B 测试 + 用户反馈 + 人工轨迹审阅 + 系统性人工评估。</p>
+
+<footer class="lesson-foot">一手资料：<a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Demystifying evals for AI agents (Anthropic)</a> · <a href="https://hamel.dev/blog/posts/evals-faq/">LLM Evals FAQ (Hamel Husain)</a></footer>
+
+</body>
+</html>

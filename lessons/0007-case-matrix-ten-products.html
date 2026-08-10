@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案例课 · 十款热门 AI 产品全维度矩阵</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="lesson-head">
+  <div class="course">LLM Agent 与 Harness 工程 · 案例课 07（智慧阶段）</div>
+  <h1>十款产品 × 六个维度：一张完整的 Agent 产品地图</h1>
+  <p class="lede">在案例课 06 的七款产品基础上，加入 Qoder、QoderWork、千问办公，凑成十款；维度从 3 个扩到 6 个。这张表可以直接拿去和团队讨论竞品定位。</p>
+</header>
+
+<span class="kicker">前置知识：<a href="./0006-case-taxonomy-popular-agents.html">案例课 06</a> · <a href="./0005-case-anatomy-qoder-qwenwork.html">案例课 05</a></span>
+
+<h2>1. 十款产品 × 六维度矩阵</h2>
+
+<p>六个维度的选取逻辑：①服务对象 ②执行位置 ③循环透明度 ④交付形态 ⑤并行能力 ⑥生态绑定——分别回答"给谁用、在哪跑、看不看得见、给你什么、能同时干几件、被什么锁定"。</p>
+
+<table>
+  <tr>
+    <th>产品</th><th>物种</th><th>① 服务对象</th><th>② 执行位置</th><th>③ 透明度</th><th>④ 交付形态</th><th>⑤ 并行</th><th>⑥ 生态</th>
+  </tr>
+  <tr><td>Cursor</td><td>编程 Harness</td><td>个人开发者</td><td>本地 IDE</td><td>最高</td><td>代码 diff</td><td>弱</td><td>IDE 习惯</td></tr>
+  <tr><td>Claude Code</td><td>编程 Harness</td><td>专业开发者</td><td>本地终端</td><td>高</td><td>代码改动</td><td>中</td><td>Skills 生态</td></tr>
+  <tr><td>Codex</td><td>编程 Harness</td><td>开发者/团队</td><td>云端沙箱</td><td>低</td><td>Pull Request</td><td>强</td><td>GitHub/OpenAI</td></tr>
+  <tr><td>Qoder</td><td>编程 Harness</td><td>开发者/团队</td><td>本地 IDE + 云端 Quest</td><td>高</td><td>代码 + 工程资产（RepoWiki）</td><td>中</td><td>IDE + MCP + Skills</td></tr>
+  <tr><td>ChatGPT</td><td>超级应用</td><td>大众消费者</td><td>云端</td><td>中低</td><td>对话 + 附件 + 代办操作</td><td>中</td><td>GPT 商店/账号</td></tr>
+  <tr><td>Claude</td><td>超级应用</td><td>大众/专业个人</td><td>云端</td><td>中低</td><td>Artifacts 成果物</td><td>弱</td><td>Projects/账号</td></tr>
+  <tr><td>Manus</td><td>横向交付</td><td>个人/小团队</td><td>云端虚拟机</td><td>低</td><td>报告/网站等成品</td><td>强</td><td>独立</td></tr>
+  <tr><td>千问办公</td><td>横向交付</td><td>个人/企业</td><td>云端 + 本地桌面端</td><td>低</td><td>PPT/文档/网页/数据报告</td><td>强（定时任务）</td><td>钉钉全家桶</td></tr>
+  <tr><td>WorkBuddy</td><td>横向交付</td><td>职场个人/企业</td><td>桌面 + IM/小程序</td><td>低</td><td>多模态任务结果</td><td>强（多 Agent）</td><td>腾讯系/CodeBuddy</td></tr>
+  <tr><td>QoderWork</td><td>横向交付</td><td>个人/多岗位</td><td>云端</td><td>低</td><td>对话 + 垂直专家套件成果</td><td>中</td><td>Qwen 模型/Qoder 家族</td></tr>
+</table>
+
+<p class="mono" style="color:var(--muted);font-size:0.8rem;">注：千问办公即 QwenWork；QoderWake（数字员工）是 Qoder 家族的另一形态，未列入本表。</p>
+
+<h2>2. 维度④深挖：交付形态是产品定位的指纹</h2>
+
+<p>六个维度里，"交付形态"最能区分产品哲学：</p>
+
+<ul>
+  <li><strong>diff / PR 系</strong>（Cursor、Claude Code、Codex、Qoder）：交付的是"变更"，天然需要评审环节——所以这类产品的 UX 核心是<strong>评审体验</strong>（diff 展示、一键回滚）。</li>
+  <li><strong>成品文件系</strong>（千问办公、WorkBuddy、Manus、QoderWork）：交付的是"可直接用的东西"，用户不评审过程只看结果——UX 核心是<strong>成果预览与迭代</strong>（"再改一版"按钮）。</li>
+  <li><strong>对话+代办系</strong>（ChatGPT、Claude）：交付混合体，既回答问题又帮你操作——UX 核心是<strong>意图切换的顺滑度</strong>。</li>
+</ul>
+
+<h2>3. 新维度发现：组织角色阶梯</h2>
+
+<p>把十款产品按"它假装是组织里的什么角色"排列，会得到一条清晰的进化阶梯：</p>
+
+<table>
+  <tr><th>角色隐喻</th><th>产品</th><th>人的动作</th></tr>
+  <tr><td>结对同事</td><td>Cursor</td><td>你写一行它补一行，随时接手</td></tr>
+  <tr><td>可委托的工程师</td><td>Claude Code、Qoder</td><td>交代任务，盯过程，把关结果</td></tr>
+  <tr><td>外包团队</td><td>Codex 云端、Manus</td><td>发需求，等交付，验收成果</td></tr>
+  <tr><td>数字员工</td><td>WorkBuddy 企业版、QoderWake</td><td>设岗位、定职责、看周报</td></tr>
+</table>
+
+<p>这条阶梯就是 2025→2026 行业叙事的主线：<strong>从"工具"到"队友"再到"员工"</strong>。角色越往上，pass^k 压力越大（员工要每天都靠谱）、评估越难、信任设计越重要——前四课的概念全部在这里收拢。</p>
+
+<h2>4. 矩阵里的三个新洞察</h2>
+
+<ol>
+  <li><strong>生态列几乎人人有，但锁定方式分两类</strong>：开发者产品靠习惯与标准（IDE 键位、MCP、Skills 开放格式），办公产品靠组织关系（钉钉/腾讯的企业入口）。前者可迁移、后者难迁移——这决定了各自的获客与流失逻辑。</li>
+  <li><strong>编程四兄弟的"执行位置"正在分化为本地与云端两派</strong>：本地派（Cursor/Claude Code/Qoder）卖控制感与隐私，云端派（Codex）卖并行与甩手。Qoder 两头都占（IDE + 云端 Quest），是矩阵里唯一的双栖者。</li>
+  <li><strong>横向交付阵营高度拥挤</strong>（Manus、千问办公、WorkBuddy、QoderWork 四款），差异化只剩三个抓手：生态绑定深度、技能资产积累、垂直岗位套件（QoderWork 的设计/幻灯片/写作三套件就是往这个方向走）。纯"通用代办"很快会同质化。</li>
+</ol>
+
+<h2>5. 对练题（升级版）</h2>
+
+<ol>
+  <li>把你自己团队正在做的（或将要做的）AI 功能放进矩阵：六格分别填什么？哪一格最难填？难填的那格就是你的产品风险。</li>
+  <li>组织角色阶梯上，"数字员工"比"外包团队"多承担了什么？这要求 Harness 增加哪些组件？（提示：记忆、定时任务、身份与权限）</li>
+</ol>
+
+<h2>6. 资料来源</h2>
+<ul>
+  <li><a href="https://market.aliyun.com/detail/cmgj00073966" target="_blank">Qoder/QoderWork（阿里云市场）</a>——从编码到办公全流程、数字员工定位</li>
+  <li><a href="https://finance.sina.com.cn/wm/2026-06-03/doc-iniachns4162046.shtml" target="_blank">QoderWork CN 通用对话入口 + 多岗位专家套件（新浪财经）</a></li>
+  <li><a href="https://help.aliyun.com/zh/qwenwork/qwenwork-intro" target="_blank">千问办公简介（阿里云帮助中心）</a></li>
+  <li><a href="https://www.codebuddy.cn/work/" target="_blank">WorkBuddy 产品页（腾讯 CodeBuddy）</a></li>
+  <li><a href="https://openai.com/zh-Hans-CN/index/unrolling-the-codex-agent-loop/" target="_blank">深入解析 Codex 智能体循环（OpenAI）</a></li>
+</ul>
+
+<nav class="lesson-nav">
+  <span>← 上一课：<a href="./0006-case-taxonomy-popular-agents.html">案例课 06 · 七款产品分类学</a></span>
+</nav>
+
+<footer class="lesson-foot">案例课 · 2026-08-10 · 解剖框架来自第 01–04 课</footer>
+
+</body>
+</html>

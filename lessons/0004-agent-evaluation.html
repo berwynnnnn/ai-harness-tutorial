@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四课 · Agent 评估：把"感觉变差了"变成数字</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="lesson-head">
+  <div class="course">LLM Agent 与 Harness 工程 · 第 04 课（路径收官）</div>
+  <h1>Agent 评估：把"感觉变差了"变成数字</h1>
+  <p class="lede">第 02 课埋过一个钩子："模型自认完成 ≠ 任务真完成"。这一课收网——如何系统地度量 Agent 到底行不行。评估（Evals）是 PM 在 Agent 领域最能直接创造价值的地方：定义"什么算成功"本来就是产品经理的本职。</p>
+</header>
+
+<span class="kicker">前置知识：<a href="./0002-agent-loop.html">Agent Loop</a> · <a href="./0003-context-engineering.html">上下文工程</a></span>
+
+<h2>0. 没有评估会发生什么</h2>
+
+<p>Anthropic 描述了一个几乎每个 Agent 团队都经历过的崩溃点<sup><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">[1]</a></sup>：</p>
+
+<p>早期靠手工测试、内部试用和直觉，产品能走得很远。但当 Agent 上线、用户变多后，某天用户开始抱怨"这次更新后它变笨了"——而团队<strong>无法验证</strong>：是模型变了？提示词改了？还是用户的感觉有偏差？于是进入" reactive 循环"：等投诉 → 手工复现 → 修一个 bug → 祈祷没修坏别的。</p>
+
+<div class="callout"><span class="label">PM 视角</span>评估的价值是复利式的：早期它强迫团队把"成功"定义清楚（两个工程师读同一份需求文档，对边界情况的理解可以完全不同，评估套件能消除这种歧义）；后期它是回归测试、是换模型时的快速体检（有评估的团队几天完成模型升级，没有的要测几周）、也是产品与研究团队之间带宽最高的沟通渠道。</div>
+
+<h2>1. 先学会行话：评估的七个术语</h2>
+
+<p>这套术语来自 Anthropic 官方定义<sup><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">[1]</a></sup>，是你和工程师对等对话的基础：</p>
+
+<table>
+  <tr><th>术语</th><th>含义</th><th>一个客服 Agent 的例子</th></tr>
+  <tr><td>任务 Task</td><td>一个有明确输入和成功标准的测试</td><td>"愤怒用户要求退款，金额 ¥80"</td></tr>
+  <tr><td>尝试 Trial</td><td>对一个任务的一次执行（模型有随机性，要多跑几次）</td><td>同一退款场景跑 5 次</td></tr>
+  <tr><td>评分器 Grader</td><td>给表现的某个方面打分的逻辑</td><td>"退款是否实际到账"检查</td></tr>
+  <tr><td>轨迹 Transcript</td><td>一次尝试的完整记录：输出、工具调用、推理</td><td>Agent 的完整对话+操作日志</td></tr>
+  <tr><td>结果 Outcome</td><td>尝试结束时<strong>环境</strong>的真实状态</td><td>数据库里真的存在这条退款记录（而不只是 Agent 说了句"已退款"）</td></tr>
+  <tr><td>评估套件 Suite</td><td>围绕同一能力目标的一组任务</td><td>退款、取消、升级三个场景的集合</td></tr>
+  <tr><td>评估框架 Eval harness</td><td>端到端跑评估的基础设施</td><td>并发跑任务、记录轨迹、汇总分数</td></tr>
+</table>
+
+<p>特别注意 <strong>Transcript 和 Outcome 的区别</strong>——这正是第 02 课钩子的答案：机票 Agent 说"已为您订好机票"（轨迹），但数据库里有没有真实预订记录（结果）才是真相。<strong>评结果，别只听 Agent 说什么。</strong></p>
+
+<h2>2. 三种评分器：能用代码判的，别用模型判</h2>
+
+<table>
+  <tr><th>类型</th><th>例子</th><th>优点</th><th>缺点</th></tr>
+  <tr>
+    <td><strong>代码评分器</strong></td>
+    <td>单元测试、字符串匹配、状态检查、工具调用校验</td>
+    <td>快、便宜、客观、可复现</td>
+    <td>死板：合理但不完全匹配预期的答案会被误杀</td>
+  </tr>
+  <tr>
+    <td><strong>模型评分器（LLM-as-judge）</strong></td>
+    <td>按评分细则给"语气是否共情"打分、成对比较</td>
+    <td>灵活，能评开放性任务</td>
+    <td>不确定、更贵，必须用人工校准过才可信</td>
+  </tr>
+  <tr>
+    <td><strong>人工评分器</strong></td>
+    <td>领域专家审阅、抽查、标注一致性检查</td>
+    <td>金标准</td>
+    <td>贵、慢、难规模化</td>
+  </tr>
+</table>
+
+<p>官方建议的优先级：<strong>能用确定性评分器就用，需要灵活性才上 LLM 评分器，人工评分器用于校准和抽查。</strong>一个实用的 LLM 评分器技巧：给模型留退路——允许它回答"信息不足，无法判断"，能显著减少评分幻觉。</p>
+
+<h2>3. 两套评估各司其职：能力评估 vs 回归评估</h2>
+
+<table>
+  <tr><th></th><th>能力评估 Capability</th><th>回归评估 Regression</th></tr>
+  <tr><td>问的问题</td><td>"这个 Agent 还能做好什么？"</td><td>"它以前会的，现在还会吗？"</td></tr>
+  <tr><td>通过率预期</td><td><strong>故意从低开始</strong>——给团队一座要爬的山</td><td>接近 100%——下降即报警</td></tr>
+  <tr><td>生命周期</td><td>通过率变高后"毕业"，转入回归套件</td><td>持续运行，捕捉漂移</td></tr>
+</table>
+
+<h2>4. 处理不确定性：pass@k 与 pass^k</h2>
+
+<p>Agent 每次跑的结果都可能不同，所以单次成败说明不了问题。两个指标要记牢：</p>
+
+<ul>
+  <li><strong>pass@k</strong>：跑 k 次，<strong>至少成功一次</strong>的概率。k 越大分越高。适合"多试几次只要成一次就行"的工具型场景。编码领域最看重 pass@1（一次就成）。</li>
+  <li><strong>pass^k</strong>：跑 k 次，<strong>全部成功</strong>的概率。k 越大分越低——单次 75% 成功率的 Agent，连跑 3 次全过的概率只有 0.75³ ≈ 42%。</li>
+</ul>
+
+<div class="callout"><span class="label">PM 视角</span>选哪个指标由产品形态决定：面向用户的客服 Agent 必须用 pass^k 思考（用户要求每次都可靠）；内部批处理工具用 pass@k 就够。向工程师要数字时先问清楚是哪一个——这两个数字能差出好几倍。</div>
+
+<h2>5. 从零到一的路线图（官方八步的精华）</h2>
+
+<ol class="step-flow">
+  <li><strong>尽早开始，别等完美</strong>：20-50 个来自真实失败案例的任务就是极好的起点。越晚开始，越要从线上系统反推成功标准。</li>
+  <li><strong>从手工测试和 bug 清单取材</strong>：把用户报过的失败直接转成测试用例，按用户影响排优先级。</li>
+  <li><strong>任务必须无歧义</strong>：好任务的标准是"两个领域专家独立判断会得出相同结论"。模糊的任务 = 指标里的噪音。</li>
+  <li><strong>评结果，不评路径</strong>：别检查"Agent 是否按特定顺序调用了工具"——Agent 经常找到出题人没想到的有效路径，过度限制步骤只会惩罚创造性。</li>
+  <li><strong>设计部分得分</strong>：正确识别了问题、验证了身份、但退款没处理成功——这明显好于第一步就失败，分数应体现这个连续谱。</li>
+  <li><strong>防作弊</strong>：任务和评分器要让"通过"只能靠真正解决问题，堵死钻空子的路。</li>
+  <li><strong>读轨迹！</strong>：不读 transcript 就不知道是 Agent 真错了，还是你的评分器误杀了好答案。官方原话：在有人读过轨迹之前，不要轻信任何评估分数。</li>
+  <li><strong>警惕评估饱和</strong>：通过率 100% 的评估只能防回归、不能再指引进步，该换更难的题了。</li>
+</ol>
+
+<h2>6. 评估不是唯一防线：瑞士奶酪模型</h2>
+
+<p>自动化评估跑在上线前（每次改动、每次换模型都跑）；但没有任何一层能拦住所有问题，完整的图景是多层叠加<sup><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">[1]</a></sup>：</p>
+
+<ul>
+  <li><strong>生产监控</strong>——上线后的真实行为分布，暴露合成评估没覆盖的场景（但问题已经触达用户了）</li>
+  <li><strong>A/B 测试</strong>——用真实流量验证重大改动（慢，但测的是用户结果）</li>
+  <li><strong>用户反馈</strong>——暴露你没预料到的问题（稀疏、偏向严重问题）</li>
+  <li><strong>人工轨迹审阅</strong>——每周抽样读轨迹，校准"什么是好"的直觉</li>
+  <li><strong>系统性人工评估</strong>——留给校准 LLM 评分器和主观性强的任务</li>
+</ul>
+
+<h2>7. 回到你的角色：PM 是评估的第一作者</h2>
+
+<p>这是全课程里最直接的行动号召——Anthropic 原文明确写道：<strong>"离产品需求和用户最近的人最适合定义成功"</strong>，并鼓励产品经理直接参与贡献评估任务<sup><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">[1]</a></sup>。你可以：</p>
+
+<ul>
+  <li><strong>用评估任务压力测试需求</strong>：写不出评估任务的 PRD，说明需求还不够具体</li>
+  <li><strong>主持"成功标准"工作坊</strong>：把客服、销售拉进来定义三个问题——不破坏事情、做了我要求的事、做得好（这是视频编辑产品 Descript 的三维框架）</li>
+  <li><strong>把 bug 清单变成评估资产的流程固化下来</strong>：每个线上事故复盘时问一句"它能变成一个测试用例吗？"</li>
+  <li><strong>要求团队区分 pass@k 和 pass^k 汇报</strong>，并为面向用户的功能守住 pass^k 底线</li>
+</ul>
+
+<h2>8. 小测验（即时反馈）</h2>
+<p>先别看上文，从记忆里作答。</p>
+
+<div class="quiz" data-quiz='[
+{"q":"\"Trajectory（轨迹）\"和\"Outcome（结果）\"的关键区别是什么？","opts":["轨迹是模型的输出记录，结果是环境的真实最终状态","轨迹是评估的得分记录，结果是评估的通过与否","轨迹是用户的原始输入，结果是模型的最终回答"],"answer":0,"why":"轨迹记录 Agent 说了什么、做了什么；结果是环境里的真实状态（如数据库里是否真有预订）。评结果，别只听 Agent 说什么。"},
+{"q":"三种评分器的推荐使用优先级是？","opts":["优先人工评分，其次模型评分，最后代码评分","优先代码评分，其次模型评分，人工用于校准","优先模型评分，其次代码评分，最后人工评分"],"answer":1,"why":"能用确定性（代码）评分器就用：快、便宜、客观；LLM 评分器补灵活性；人工评分器贵而准，用来校准模型评分器。"},
+{"q":"pass^k 衡量的是什么？适合什么场景？","opts":["k 次尝试至少成功一次的概率，适合批处理工具","k 次尝试全部成功的概率，适合面向用户的功能","k 次尝试平均成功的比例，适合所有类型产品"],"answer":1,"why":"pass^k 要求每次一致成功，k 越大越难——面向用户的 Agent 必须用它思考可靠性。"},
+{"q":"为什么能力评估（Capability eval）的通过率应该故意从低开始？","opts":["通过率低说明评估足够严谨，能防止过拟合","它给团队一座要爬的山，饱和的评估没有改进信号","通过率低能让团队更重视，提高投入的积极性"],"answer":1,"why":"能力评估的目的是指引改进方向；通过率接近 100% 时评估只剩回归保护作用，失去爬山的信号。"}
+]'></div>
+
+<h2>9. 推荐一手资料</h2>
+<p>本课核心：<a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">Demystifying evals for AI agents（Anthropic）</a>——目前最完整的 Agent 评估框架文。补充阅读：<a href="https://hamel.dev/blog/posts/evals-faq/" target="_blank">LLM Evals FAQ（Hamel Husain）</a>——业界最受欢迎的评估课程作者的答疑集，实操性极强。</p>
+
+<div class="callout"><span class="label">别忘了</span>我就是你的老师。比如"怎么给评分细则（rubric）写提示词""评估框架选哪个"——任何一处想深挖，直接问我。</div>
+
+<nav class="lesson-nav">
+  <span>← 上一课：<a href="./0003-context-engineering.html">上下文工程</a></span>
+  <span>🎓 路径收官：<a href="#graduation">毕业小结 ↓</a></span>
+</nav>
+
+<h2 id="graduation">毕业小结：你已经拥有的心智地图</h2>
+
+<p>四课下来，你手里有了一张完整的 Agent 产品地图：</p>
+
+<ol>
+  <li><strong>Harness 概览</strong>：模型只是大脑，Harness 让它干活；产品差异的主战场在 Harness。</li>
+  <li><strong>Agent Loop</strong>：一切的内核是 while 循环；模型只输出意图，执行在 Harness 侧；失败有五种经典崩坏方式。</li>
+  <li><strong>上下文工程</strong>：上下文是稀缺的注意力预算；治理靠最小化、压缩、笔记、子 Agent。</li>
+  <li><strong>Agent 评估</strong>：定义成功、度量成功、守护成功；这是 PM 的主场。</li>
+</ol>
+
+<p>下一步建议从"知识"走向"智慧"：拿你真实接触的 Agent 产品做解剖——它的一轮循环是什么样的？失败时会怎样？有什么评估手段？随时把你的分析拿来和我对练。</p>
+
+<footer class="lesson-foot">
+ 引用：[1] <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank">Demystifying evals for AI agents, Anthropic Engineering</a> ·
+ [2] <a href="https://hamel.dev/blog/posts/evals-faq/" target="_blank">LLM Evals FAQ, Hamel Husain</a>
+</footer>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

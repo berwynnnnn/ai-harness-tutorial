@@ -1,0 +1,60 @@
+/* Shared course stylesheet — clean editorial style, prints well */
+:root {
+  --ink: #1a1a18;
+  --paper: #fcfbf7;
+  --accent: #b3541e;
+  --muted: #6b675e;
+  --rule: #d8d4c8;
+  --ok: #2f6b3a;
+  --bad: #a03030;
+  --code-bg: #f1efe7;
+}
+* { box-sizing: border-box; }
+html { font-size: 17px; }
+body {
+  margin: 0 auto;
+  max-width: 46rem;
+  padding: 3rem 1.5rem 6rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+  line-height: 1.75;
+}
+header.lesson-head { border-bottom: 2px solid var(--ink); padding-bottom: 1rem; margin-bottom: 2.5rem; }
+header.lesson-head .course { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.75rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0.4rem 0 0.6rem; }
+h2 { font-size: 1.3rem; margin-top: 3rem; border-bottom: 1px solid var(--rule); padding-bottom: 0.3rem; }
+h3 { font-size: 1.05rem; margin-top: 2rem; }
+.lede { font-size: 1.05rem; color: var(--muted); }
+a { color: var(--accent); }
+a:hover { text-decoration-thickness: 2px; }
+code, pre, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em; }
+code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: var(--code-bg); padding: 1rem 1.2rem; border-radius: 8px; overflow-x: auto; line-height: 1.55; }
+table { border-collapse: collapse; width: 100%; margin: 1.5rem 0; font-size: 0.92rem; }
+th, td { border: 1px solid var(--rule); padding: 0.5rem 0.7rem; text-align: left; vertical-align: top; }
+th { background: #f4f1e8; }
+.kicker { display: inline-block; font-family: ui-monospace, monospace; font-size: 0.7rem; background: var(--ink); color: var(--paper); padding: 0.15rem 0.6rem; border-radius: 3px; margin-bottom: 1rem; }
+.callout { border-left: 3px solid var(--accent); background: #f7f2e9; padding: 0.9rem 1.2rem; margin: 1.8rem 0; }
+.callout .label { font-weight: 700; font-size: 0.85rem; color: var(--accent); display: block; margin-bottom: 0.3rem; }
+.step-flow { counter-reset: step; list-style: none; padding: 0; }
+.step-flow li { position: relative; padding: 0.6rem 0 0.6rem 3rem; border-left: 2px solid var(--rule); margin-left: 1rem; }
+.step-flow li::before {
+  counter-increment: step; content: counter(step);
+  position: absolute; left: -1rem; top: 0.5rem;
+  width: 1.9rem; height: 1.9rem; border-radius: 50%;
+  background: var(--ink); color: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-family: ui-monospace, monospace; font-size: 0.85rem;
+}
+nav.lesson-nav { margin-top: 4rem; padding-top: 1.5rem; border-top: 2px solid var(--ink); font-size: 0.9rem; display: flex; justify-content: space-between; gap: 1rem; }
+.quiz-q { border: 1px solid var(--rule); border-radius: 8px; padding: 1.2rem 1.4rem; margin: 1.4rem 0; background: #fff; }
+.quiz-q .opt { display: block; margin: 0.5rem 0; }
+.quiz-q .opt label { cursor: pointer; }
+.quiz-q button { margin-top: 0.8rem; font: inherit; font-size: 0.9rem; padding: 0.35rem 1.2rem; border: 1px solid var(--ink); background: var(--paper); border-radius: 6px; cursor: pointer; }
+.quiz-q button:hover { background: var(--ink); color: var(--paper); }
+.quiz-q .fb { margin-top: 0.8rem; padding: 0.6rem 0.9rem; border-radius: 6px; font-size: 0.92rem; display: none; }
+.quiz-q .fb.ok { display: block; background: #e8f0e6; color: var(--ok); }
+.quiz-q .fb.bad { display: block; background: #f6e6e6; color: var(--bad); }
+footer.lesson-foot { margin-top: 4rem; font-size: 0.8rem; color: var(--muted); }
+@media print { body { max-width: none; } nav.lesson-nav, .quiz-q button { display: none; } }

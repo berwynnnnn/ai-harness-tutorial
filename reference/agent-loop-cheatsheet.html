@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · Agent Loop</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="lesson-head">
+  <div class="course">Reference · 速查卡</div>
+  <h1>Agent Loop 速查卡</h1>
+  <p class="lede">压缩自<a href="../lessons/0002-agent-loop.html">第 02 课</a>。日常查阅用，可打印。</p>
+</header>
+
+<h2>核心公式</h2>
+<pre>Agent Loop = while(未完成) { 模型决策 → Harness 执行工具 → 结果回填上下文 }
+模型 = 只输出意图（文字）；Harness = 唯一执行者</pre>
+
+<h2>一轮循环 7 步</h2>
+<table>
+  <tr><th>#</th><th>步骤</th><th>执行者</th></tr>
+  <tr><td>1</td><td>组装上下文（提示词+工具清单+历史）</td><td>Harness</td></tr>
+  <tr><td>2</td><td>推理决策（调工具 or 直接回答）</td><td>模型</td></tr>
+  <tr><td>3</td><td>解析输出</td><td>Harness</td></tr>
+  <tr><td>4</td><td>权限/安全关卡</td><td>Harness</td></tr>
+  <tr><td>5</td><td>执行工具</td><td>Harness</td></tr>
+  <tr><td>6</td><td>结果回填（观察）</td><td>Harness</td></tr>
+  <tr><td>7</td><td>终止检查，否则回到 1</td><td>Harness</td></tr>
+</table>
+
+<h2>数据流速记</h2>
+<ul>
+  <li>模型输出 <code>tool_use {name, input}</code> → Harness 校验+执行 → <code>tool_result</code> 回填历史 → 再次调用模型</li>
+  <li>每轮重发<strong>全部历史</strong> ⇒ 上下文单调增长 ⇒ 成本↑、旧信息持续影响模型</li>
+  <li>工具描述 = 提示词的一部分，决定模型用得对不对</li>
+</ul>
+
+<h2>终止条件</h2>
+<table>
+  <tr><th>类型</th><th>触发方</th><th>机制</th></tr>
+  <tr><td>正常完成</td><td>模型</td><td>输出最终回答，<code>stop_reason=end_turn</code></td></tr>
+  <tr><td>保底刹车</td><td>Harness</td><td>最大轮数 / 费用预算 / 超时 / 错误熔断</td></tr>
+  <tr><td>外部干预</td><td>用户</td><td>中断、修改指令</td></tr>
+</table>
+<p>注意：end_turn ≠ 任务真完成；严肃产品需加结果校验。</p>
+
+<h2>失败模式 → 对策</h2>
+<table>
+  <tr><th>模式</th><th>对策</th></tr>
+  <tr><td>死循环</td><td>轮数上限 + 重复调用检测注入提醒</td></tr>
+  <tr><td>幻觉工具/参数</td><td>清晰的工具描述 + 校验失败时回传原因供重试</td></tr>
+  <tr><td>目标漂移</td><td>目标固定在系统提示词；长任务拆短循环</td></tr>
+  <tr><td>上下文爆炸</td><td>压缩/摘要、按需检索（→ 上下文工程）</td></tr>
+  <tr><td>错误信息反噬</td><td>为模型重写报错：讲清现状+建议下一步</td></tr>
+</table>
+
+<h2>PM 指标</h2>
+<p>平均循环轮数 · 任务完成率 vs 模型自认完成率 · 单任务成本 · 用户中断率</p>
+
+<footer class="lesson-foot">一手资料：<a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works">How tool use works</a> · <a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Writing effective tools</a> · <a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents</a></footer>
+
+</body>
+</html>

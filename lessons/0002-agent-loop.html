@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第二课 · Agent Loop：思考-行动-观察循环</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="lesson-head">
+  <div class="course">LLM Agent 与 Harness 工程 · 第 02 课</div>
+  <h1>Agent Loop：思考-行动-观察循环是怎么跑起来的</h1>
+  <p class="lede">本课你会得到一个精确的心智模型：一轮循环的完整步骤、工具调用的数据流、循环何时终止、以及它为什么会失控。掌握这些，你就能看懂任何 Agent 产品 80% 的行为。</p>
+</header>
+
+<span class="kicker">前置知识：Harness 概览（第一课）</span>
+
+<h2>0. 最重要的一个心智模型</h2>
+
+<p>先记住一句颠覆直觉的话：<strong>大模型本身什么都执行不了。</strong>它不能读文件、不能上网、不能运行命令——它只能输出文字。所有"行动"都是由 Harness 代劳的。</p>
+
+<p>所以 Agent Loop 的本质极其朴素：<strong>一个 while 循环</strong>。Anthropic 官方文档称之为 agentic loop——LLM 在循环里不断"看环境 → 做决定 → 产生行动意图"，Harness 负责把意图变成真实动作，再把动作结果喂回去。<sup><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works" target="_blank">[1]</a></sup></p>
+
+<pre>while (任务未完成) {
+    模型输出 = 调用模型(完整上下文);
+    if (模型输出包含工具调用) {
+        结果 = Harness执行工具(调用参数);
+        把结果追加进上下文;          // 这就是"观察"
+    } else {
+        任务完成;                    // 模型给出了最终回答
+    }
+}</pre>
+
+<p>就这么几行。所有让人眼花缭乱的 Agent 产品，内核都是这个循环的变体。</p>
+
+<h2>1. 一轮循环的完整步骤</h2>
+
+<p>把镜头放慢，一轮完整迭代有 7 个步骤：</p>
+
+<ol class="step-flow">
+  <li><strong>组装上下文</strong>：Harness 把系统提示词、工具清单（每个工具的名称、描述、参数 schema）、全部历史消息打包成一次 API 请求。</li>
+  <li><strong>模型推理（思考）</strong>：模型阅读上下文，决定下一步——是调用某个工具，还是直接回答用户。</li>
+  <li><strong>输出解析</strong>：Harness 检查模型输出：是普通文本，还是结构化的工具调用请求？</li>
+  <li><strong>安全关卡</strong>：执行前，Harness 检查权限——这个操作是否需要用户确认？（比如删除文件）这是 Harness 的产品决策点。</li>
+  <li><strong>工具执行（行动）</strong>：Harness（不是模型！）在真实环境里执行：读文件、跑命令、调 API。</li>
+  <li><strong>结果回填（观察）</strong>：执行结果（成功输出或报错信息）作为一条新消息追加进对话历史。</li>
+  <li><strong>终止检查</strong>：Harness 判断：模型是否决定结束？是否超出轮数/时间/费用上限？没结束就回到第 1 步，进入下一轮。</li>
+</ol>
+
+<div class="callout"><span class="label">PM 视角</span>注意第 4 步——"何时打断模型、向用户要确认"是纯产品决策。确认太少，用户害怕失控；确认太多，Agent 的体验退化成弹窗地狱。这是 Agent 产品信任设计的核心张力。</div>
+
+<h2>2. 工具调用的数据流：模型只写"申请单"</h2>
+
+<p>这是新手最容易误解的地方。模型调用工具的过程，更像<strong>填一张申请单交给 Harness 审批执行</strong>，而不是自己动手。看一个真实的消息序列（简化自 <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works" target="_blank">Anthropic 文档 [1]</a>）：</p>
+
+<pre>// 第 1 次请求：用户的问题 + 可用工具清单
+用户: "utils.py 这个文件有多少行？"
+
+// 模型的回复——不是答案，而是一张"申请单"
+模型: tool_use: {
+        name: "count_lines",
+        input: { path: "utils.py" }
+      }
+// ↑ 模型到这里就停了。它不知道也不关心这个工具怎么运行
+
+// Harness 拿到申请单：校验参数 → 执行 → 拿到结果
+// 第 2 次请求：Harness 把结果塞回历史，再次调用模型
+tool_result: "128"
+
+// 模型这才给出最终回答
+模型: "utils.py 共有 128 行。"</pre>
+
+<p>三个关键结论：</p>
+<ul>
+  <li><strong>模型输出的是结构化意图</strong>（工具名 + JSON 参数），真正的执行永远发生在 Harness 侧。所以工具的参数校验、权限控制、错误处理全在 Harness 手里——这是你的工程团队的主战场。</li>
+  <li><strong>每一轮迭代，Harness 都要把完整历史重新发给模型。</strong>模型没有记忆，它的"记忆"就是不断变长的消息列表。这直接导致两个后果：<em>上下文越滚越大</em>（成本和性能问题）、以及<em>旧信息永远在影响模型</em>（上下文工程问题的根源，下一课的主题）。</li>
+  <li><strong>工具描述本身就是提示词。</strong>模型靠工具的名称和描述来决定"用不用、怎么用"。描述写得含糊，模型就会用错——工具文档的质量直接决定 Agent 的成功率。<sup><a href="https://www.anthropic.com/engineering/writing-tools-for-agents" target="_blank">[2]</a></sup></li>
+</ul>
+
+<h2>3. 循环何时终止？</h2>
+
+<p>一个会自己决定"下一步做什么"的系统，必须有刹车。终止条件分两类：</p>
+
+<h3>模型主动终止（理想情况）</h3>
+<p>模型认为任务完成，输出最终回答而不再请求任何工具。API 层面会返回一个终止标记（如 <code>stop_reason = end_turn</code>）。<sup><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works" target="_blank">[1]</a></sup></p>
+
+<h3>Harness 强制终止（保底机制）</h3>
+<table>
+  <tr><th>机制</th><th>含义</th><th>PM 要定义的产品问题</th></tr>
+  <tr><td>最大轮数</td><td>循环 N 轮仍未结束，强制停止</td><td>N 设多少？简单问答 5 轮够了，复杂编程任务可能要上百轮</td></tr>
+  <tr><td>预算上限</td><td>累计 token 消耗或费用超阈值即停</td><td>单任务成本上限是多少？超了是报错还是降级？</td></tr>
+  <tr><td>超时</td><td>单步或整体耗时超限</td><td>用户的耐心阈值——等多久算"卡住了"？</td></tr>
+  <tr><td>用户中断</td><td>用户随时喊停或修改指令</td><td>中断后是丢弃全部进度还是可恢复？</td></tr>
+  <tr><td>错误熔断</td><td>连续失败若干次后停止重试</td><td>失败几次算"这条路走不通"？</td></tr>
+</table>
+
+<div class="callout"><span class="label">专家细节</span>"模型认为自己完成了"≠"任务真的完成了"。模型可能在任务只做了一半时就输出 end_turn。所以严肃的 Agent 产品还会加<strong>结果校验</strong>（比如改完代码后跑一遍测试），这属于下一站"Agent 评估"的话题。</div>
+
+<h2>4. 常见失败模式与应对</h2>
+
+<p>专家和普通人的区别，是知道这个循环会以哪几种方式崩坏。五种最常见：</p>
+
+<table>
+  <tr><th>失败模式</th><th>表现</th><th>根因</th><th>应对</th></tr>
+  <tr>
+    <td><strong>死循环</strong></td>
+    <td>模型反复执行同一个无效操作，轮数暴涨、费用失控</td>
+    <td>模型无法从错误信息中学到"换条路"</td>
+    <td>轮数上限 + 重复动作检测（Harness 发现同一调用出现多次就注入提醒）</td>
+  </tr>
+  <tr>
+    <td><strong>幻觉工具调用</strong></td>
+    <td>调用不存在的工具，或参数格式错误、编造文件路径</td>
+    <td>模型对工具集理解模糊，"想象"出合理但不存在的接口</td>
+    <td>工具描述写清楚边界；Harness 校验失败时把"为什么错"讲明白再还给模型重试</td>
+  </tr>
+  <tr>
+    <td><strong>目标漂移</strong></td>
+    <td>做着做着忘了原始任务，开始修无关的东西</td>
+    <td>上下文越长，初始指令的影响力被稀释</td>
+    <td>把用户目标固定在系统提示词里；长任务拆成多个短循环分段执行</td>
+  </tr>
+  <tr>
+    <td><strong>上下文爆炸</strong></td>
+    <td>任务中后期突然变慢、变贵、变笨</td>
+    <td>历史消息超过窗口上限，被粗暴截断，关键信息丢失</td>
+    <td>上下文压缩/摘要、按需检索而非全量塞入——这是上下文工程的核心</td>
+  </tr>
+  <tr>
+    <td><strong>错误信息反噬</strong></td>
+    <td>工具报错后模型开始乱试，越修越错</td>
+    <td>报错信息是给人看的，不是给模型看的，模型读不懂</td>
+    <td>为模型重写错误信息：说清楚发生了什么、建议下一步——工具设计的一部分<sup><a href="https://www.anthropic.com/engineering/writing-tools-for-agents" target="_blank">[2]</a></sup></td>
+  </tr>
+</table>
+
+<h2>5. 回到你的角色：PM 能做什么</h2>
+
+<p>理解了 Agent Loop，你就拿到了 Agent 产品最重要的几个观测指标：</p>
+<ul>
+  <li><strong>平均循环轮数</strong>——同类任务的轮数突然上升，通常是工具或提示词退化了的早期信号</li>
+  <li><strong>任务完成率 vs 模型自认完成率</strong>——两者的差距就是"需要加结果校验"的证据</li>
+  <li><strong>单任务成本</strong>——每轮都在重发全部历史，轮数 × 上下文长度 ≈ 费用</li>
+  <li><strong>用户中断率</strong>——用户在循环中途叫停的比例，反映信任与体验问题</li>
+</ul>
+
+<h2>6. 小测验（即时反馈）</h2>
+<p>先别看上文，从记忆里作答——这正是让知识留在长期记忆里的方式。</p>
+
+<div class="quiz" data-quiz='[
+{"q":"工具真正被执行的位置在哪里？","opts":["在大模型内部执行，和推理同时发生","在 Harness 一侧执行，模型只输出调用意图","在用户的浏览器里执行，与模型无关"],"answer":1,"why":"模型只能输出文字（结构化的调用意图），所有真实执行都发生在 Harness 侧。"},
+{"q":"为什么 Agent 循环跑得越久，单次调用越贵？","opts":["因为每轮都要重发全部历史，上下文持续变长","因为模型每轮都要重新加载一遍工具清单","因为历史消息会被加密，解密需要费用"],"answer":0,"why":"模型没有记忆，Harness 每轮都重发完整历史，token 数随轮数累积增长。"},
+{"q":"模型输出最终回答、不再请求工具，属于哪种终止？","opts":["Harness 因超出轮数上限而强制中断","模型主动终止，API 返回 end_turn 标记","用户手动中断，循环被外部信号打断"],"answer":1,"why":"这是理想路径：模型判断任务完成，输出最终回答，stop_reason 为 end_turn。"},
+{"q":"Agent 反复调用同一个失败的工具、停不下来，最优先的对策是？","opts":["提高模型温度参数，让输出更有创造性","直接删掉这个工具，让模型无法再调用它","设置轮数上限并检测重复调用、注入提醒"],"answer":2,"why":"死循环靠 Harness 的保底机制治理：轮数上限 + 重复动作检测。删工具治标不治本，调温度反而更不可控。"}
+]'></div>
+
+<h2>7. 推荐一手资料</h2>
+<p>本课最重要的一篇：<a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works" target="_blank">How tool use works（Claude 官方文档）</a>——官方对 agentic loop 的机制讲解，含数据流图示，15 分钟可读完。进阶读 <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank">Building Effective Agents</a>（Agent vs Workflow 的经典定义）。</p>
+
+<div class="callout"><span class="label">别忘了</span>我就是你的老师。任何一处没看懂——无论是"stop_reason 到底是什么"还是"轮数上限该怎么定"——直接问我，我可以无限展开、换角度讲、举你产品的例子讲。</div>
+
+<nav class="lesson-nav">
+  <span>← 上一课：<a href="./0001-harness-overview.html">Harness 是什么</a></span>
+  <span>下一课：上下文工程（Context Engineering）→</span>
+</nav>
+
+<footer class="lesson-foot">
+  引用：[1] <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works" target="_blank">How tool use works, Claude Platform Docs</a> ·
+  [2] <a href="https://www.anthropic.com/engineering/writing-tools-for-agents" target="_blank">Writing effective tools for AI agents, Anthropic Engineering</a> ·
+  [3] <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank">Building Effective Agents, Anthropic Engineering</a>
+</footer>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

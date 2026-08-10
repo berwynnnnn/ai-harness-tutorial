@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>给产品人的 Agent 速成课 · Harness 与 AI Agent 产品方法论</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.hero { border-bottom: 2px solid var(--ink); padding-bottom: 2rem; margin-bottom: 3rem; }
+.hero .badge { font-family: ui-monospace, monospace; font-size: 0.72rem; background: var(--accent); color: #fff; padding: 0.2rem 0.7rem; border-radius: 3px; margin-right: 0.5rem; display: inline-block; margin-bottom: 1rem; }
+.hero h1 { font-size: 2.3rem; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; margin: 2rem 0; }
+.card { border: 1px solid var(--rule); border-radius: 10px; padding: 1.3rem 1.4rem; background: #fff; text-decoration: none; color: inherit; display: block; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26,26,24,0.08); }
+.card .no { font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--accent); letter-spacing: 0.1em; }
+.card h3 { margin: 0.4rem 0 0.5rem; font-size: 1.02rem; }
+.card p { margin: 0; font-size: 0.86rem; color: var(--muted); line-height: 1.6; }
+.card.case { border-left: 3px solid var(--accent); }
+.cta { text-align: center; margin: 3.5rem 0; }
+.cta a.btn { display: inline-block; background: var(--ink); color: var(--paper); padding: 0.8rem 2.4rem; border-radius: 8px; text-decoration: none; font-size: 1.05rem; }
+.stats { display: flex; gap: 2.5rem; justify-content: center; margin: 2rem 0; flex-wrap: wrap; }
+.stats .stat { text-align: center; }
+.stats .num { font-size: 2rem; font-weight: 700; }
+.stats .lbl { font-size: 0.8rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="badge">面向产品 / 运营 / 非工程背景</span>
+  <span class="badge">全部引用一手资料</span>
+  <span class="badge">持续更新中</span>
+  <h1>给产品人的 Agent 速成课</h1>
+  <p class="lede">不写一行代码，看懂所有 AI Agent 产品的底层逻辑。从一个类比开始，到亲手解剖十款热门产品——ChatGPT、Codex、Claude Code、Cursor、Manus、千问办公、WorkBuddy、Qoder……</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">7</div><div class="lbl">节核心课 + 案例课</div></div>
+  <div class="stat"><div class="num">10</div><div class="lbl">款热门产品被解剖</div></div>
+  <div class="stat"><div class="num">24</div><div class="lbl">道即时反馈测验</div></div>
+  <div class="stat"><div class="num">3</div><div class="lbl">张可打印速查卡</div></div>
+</div>
+
+<h2>你将获得什么</h2>
+<ul>
+  <li>一套<strong>可复用的分析框架</strong>：Harness 七组件、Agent Loop、上下文工程、Agent 评估</li>
+  <li>和工程师<strong>对等对话的行话</strong>：tool_use、stop_reason、pass@k / pass^k、Compaction……</li>
+  <li>一张<strong>十款热门产品的六维矩阵</strong>，直接可用于竞品讨论</li>
+  <li>PM 视角的<strong>指标清单</strong>：循环轮数、上下文利用率、任务完成率、用户中断率</li>
+</ul>
+
+<div class="cta"><a class="btn" href="lessons/0001-harness-overview.html">从第一课开始 →</a></div>
+
+<h2>核心课程</h2>
+<div class="card-grid">
+  <a class="card" href="lessons/0001-harness-overview.html">
+    <div class="no">LESSON 01</div><h3>Harness：模型之外的那半个产品</h3>
+    <p>一个马与挽具的类比，七个组件清单，三个"为什么现在必须懂"的理由。</p>
+  </a>
+  <a class="card" href="lessons/0002-agent-loop.html">
+    <div class="no">LESSON 02</div><h3>Agent Loop：思考-行动-观察循环</h3>
+    <p>循环 7 步、工具调用数据流、终止条件、五种经典崩坏方式。</p>
+  </a>
+  <a class="card" href="lessons/0003-context-engineering.html">
+    <div class="no">LESSON 03</div><h3>上下文工程：治理注意力预算</h3>
+    <p>上下文腐化、压缩、笔记、子 Agent——Harness 最核心的战场。</p>
+  </a>
+  <a class="card" href="lessons/0004-agent-evaluation.html">
+    <div class="no">LESSON 04</div><h3>Agent 评估：把"感觉变差"变成数字</h3>
+    <p>七个术语、三种评分器、pass@k vs pass^k——PM 的主场。</p>
+  </a>
+</div>
+
+<h2>案例解剖系列</h2>
+<div class="card-grid">
+  <a class="card case" href="lessons/0005-case-anatomy-qoder-qwenwork.html">
+    <div class="no">CASE 05</div><h3>解剖 Qoder 与千问办公</h3>
+    <p>垂直深 Harness vs 横向交付平台；透明度光谱第一次应验。</p>
+  </a>
+  <a class="card case" href="lessons/0006-case-taxonomy-popular-agents.html">
+    <div class="no">CASE 06</div><h3>七款热门产品的分类学</h3>
+    <p>ChatGPT / Codex / Claude Code / Cursor / Manus / WorkBuddy——三类物种正名。</p>
+  </a>
+  <a class="card case" href="lessons/0007-case-matrix-ten-products.html">
+    <div class="no">CASE 07</div><h3>十款产品 × 六维度全矩阵</h3>
+    <p>组织角色阶梯：从结对同事到数字员工；可直接拿去开竞品会。</p>
+  </a>
+</div>
+
+<h2>速查卡（可打印）</h2>
+<div class="card-grid">
+  <a class="card" href="reference/agent-loop-cheatsheet.html"><div class="no">REF</div><h3>Agent Loop 速查卡</h3><p>循环 7 步 + 失败模式对策表。</p></a>
+  <a class="card" href="reference/context-engineering-cheatsheet.html"><div class="no">REF</div><h3>上下文工程速查卡</h3><p>注意力预算 + 长任务三法宝。</p></a>
+  <a class="card" href="reference/agent-evaluation-cheatsheet.html"><div class="no">REF</div><h3>Agent 评估速查卡</h3><p>术语表 + pass@k/pass^k + 路线图。</p></a>
+</div>
+
+<h2>这门课不一样在哪</h2>
+<ul>
+  <li><strong>立场明确</strong>：写给产品经理、运营和非工程背景的人——每个概念都落到"你能做什么决策"</li>
+  <li><strong>拒绝二手信息</strong>：所有论断引用 Anthropic / OpenAI / Cognition 官方一手资料，文末附出处</li>
+  <li><strong>学了就练</strong>：每课小测验即时反馈，案例课直接解剖真实产品</li>
+</ul>
+
+<footer class="lesson-foot">
+  <p>发现错误或想提名下一个被解剖的产品？欢迎提 Issue / PR。觉得有用请点 Star ⭐</p>
+  <p>MIT License · 基于 Anthropic、OpenAI、Cognition 等公开一手资料整理</p>
+</footer>
+
+</body>
+</html>

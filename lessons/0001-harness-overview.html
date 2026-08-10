@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第一课 · Harness 是什么</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="lesson-head">
+  <div class="course">LLM Agent 与 Harness 工程 · 第 01 课</div>
+  <h1>Harness：模型之外的那半个产品</h1>
+  <p class="lede">写给非工程背景的产品人：一个类比、一张组件清单、三个"为什么现在必须懂它"的理由。读完本课，你看 AI 编程/办公产品的眼光会不一样。</p>
+</header>
+
+<h2>0. 一句话定义</h2>
+
+<p><strong>Harness（直译"挽具/线束"）指包裹在 LLM 模型外面的那一整套工程系统</strong>——它负责接收输入、组织上下文、调用工具、管理权限、循环执行任务，最后把结果交回给用户。模型本身只是"输入文字 → 输出文字"的大脑，Harness 才是让它干活的身体。</p>
+
+<h2>1. 一个类比</h2>
+
+<p>把大模型想象成一匹力气很大但看不见路的马：</p>
+
+<ul>
+  <li><strong>模型</strong>：马——有原始能力，但不知道目的地在哪</li>
+  <li><strong>Harness</strong>：缰绳 + 马鞍 + 马车的整套装置——决定往哪走、能走多快、拉什么货、何时停</li>
+  <li><strong>最终产品</strong>：把你送到目的地的马车</li>
+</ul>
+
+<div class="callout"><span class="label">关键洞察</span>同一匹马（同一个模型），配上不同质量的挽具，效果天差地别。这就是为什么各家 AI 产品体验差异巨大——很多时候差的不是模型，是 Harness。</div>
+
+<h2>2. Harness 的七个组件</h2>
+
+<table>
+  <tr><th>组件</th><th>职责</th><th>产品经理视角的问题</th></tr>
+  <tr><td>系统提示词</td><td>定义 Agent 的角色与行为规范</td><td>我们的 Agent 应该多主动？多保守？</td></tr>
+  <tr><td>上下文管理</td><td>决定模型每次"看到"哪些信息</td><td>窗口有限，什么该进、什么该裁？</td></tr>
+  <tr><td>工具层</td><td>让模型能读文件、执行命令、上网</td><td>给多少工具？每个工具怎么描述？</td></tr>
+  <tr><td>Agent 循环</td><td>思考 → 调工具 → 看结果 → 再思考</td><td>最多循环几轮？失败了怎么办？</td></tr>
+  <tr><td>权限与安全</td><td>哪些操作要用户确认</td><td>删除文件要不要弹窗？信任设计的核心</td></tr>
+  <tr><td>记忆系统</td><td>跨会话保存偏好与项目知识</td><td>用户不想重复交代背景</td></tr>
+  <tr><td>结果呈现</td><td>diff 展示、引用、进度反馈</td><td>用户怎么验证 Agent 干得对？</td></tr>
+</table>
+
+<h2>3. 为什么这个词现在这么火</h2>
+
+<ol>
+  <li><strong>模型趋同，Harness 成为差异化主战场</strong>——大家都能接顶级模型，产品好坏越来越取决于 Harness 工程质量。</li>
+  <li><strong>Harness Engineering 正在成为新工种</strong>——提升 Agent 效果的关键往往不是换模型，而是优化上下文组织、工具设计与循环控制。</li>
+  <li><strong>它重新定义了"提示词工程"</strong>——从写一段话，升级为设计提示词、工具、上下文、反馈回路共同构成的系统。</li>
+</ol>
+
+<h2>4. 小测验（即时反馈）</h2>
+
+<div class="quiz" data-quiz='[
+{"q":"同一个顶级模型，做成两个不同产品后体验差距很大，最可能的原因是？","opts":["两家使用的模型参数其实并不相同","包裹模型的 Harness 工程质量不同","用户的设备性能差异导致体验不同"],"answer":1,"why":"模型趋同的时代，产品体验差异主要来自 Harness：上下文管理、工具设计、循环控制等。"},
+{"q":"\"删除文件前是否弹窗让用户确认\"属于 Harness 的哪个组件？","opts":["工具层：它决定了工具能做什么操作","权限与安全：它是执行前的产品决策","结果呈现：它是操作完成后的反馈方式"],"answer":1,"why":"何时打断模型、向用户要确认，是权限与安全组件里的纯产品决策——信任设计的核心张力。"},
+{"q":"为什么说\"提示词工程\"正在被\"上下文工程\"取代？","opts":["因为提示词已经不重要了，模型不再需要指令","因为关注点从写好一段话升级为管理进入模型的全部信息","因为新的模型架构已经不再接受文本提示词"],"answer":1,"why":"Agent 时代要管理的是整个上下文状态——系统指令、工具、历史、外部数据，而不只是一段提示词。下一课展开。"}
+]'></div>
+
+<h2>5. 学习路径</h2>
+
+<p>本课是起点，后续课程：<a href="./0002-agent-loop.html">Agent Loop（循环机制）</a> → <a href="./0003-context-engineering.html">上下文工程</a> → <a href="./0004-agent-evaluation.html">Agent 评估</a> → 案例解剖系列。</p>
+
+<div class="callout"><span class="label">别忘了</span>课程作者建议：任何一处没看懂，找到课程的 Issues 区提问，或者自己试着用本课框架去分析一个你熟悉的 AI 产品。</div>
+
+<footer class="lesson-foot">第 01 课 · Harness 概览 · 框架参考 <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank">Building Effective Agents (Anthropic)</a></footer>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

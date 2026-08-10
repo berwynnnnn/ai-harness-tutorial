@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>案例课 · 七个热门 AI 产品的分类学解剖</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="lesson-head">
+  <div class="course">LLM Agent 与 Harness 工程 · 案例课 06（智慧阶段）</div>
+  <h1>分类学解剖：ChatGPT / Codex / Claude / Claude Code / Cursor / WorkBuddy / Manus</h1>
+  <p class="lede">七个热门产品，行业命名一团乱。本课用四课框架给它们"正名"：三类物种、三种编程形态、一条透明度光谱。</p>
+</header>
+
+<span class="kicker">前置知识：<a href="./0005-case-anatomy-qoder-qwenwork.html">案例课 05</a></span>
+
+<h2>1. 三类物种</h2>
+
+<table>
+  <tr><th>类别</th><th>产品</th><th>定义</th></tr>
+  <tr>
+    <td>聊天助手 + Agent 能力（超级应用）</td>
+    <td>ChatGPT、Claude</td>
+    <td>本体是对话；Agent 模式（浏览器操控、深度研究）是附加能力</td>
+  </tr>
+  <tr>
+    <td>垂直编程 Harness（三形态）</td>
+    <td>Cursor、Claude Code、Codex</td>
+    <td>同一 Agent 内核，分别装在 IDE / 终端 / 云端三种壳里</td>
+  </tr>
+  <tr>
+    <td>横向交付平台（通用/办公 Agent）</td>
+    <td>Manus、WorkBuddy</td>
+    <td>一句话委托、异步交付成果，"AI 同事"定位</td>
+  </tr>
+</table>
+
+<p>严格说 ChatGPT/Claude 的主体不是纯 Agent 产品，而是"长了 Agent 手臂的聊天助手"。</p>
+
+<h2>2. 编程三兄弟：同一内核，三种自主度档位</h2>
+
+<table>
+  <tr><th></th><th>Cursor</th><th>Claude Code</th><th>Codex</th></tr>
+  <tr><td>形态</td><td>AI 原生 IDE（VS Code 分支）</td><td>终端命令行 Agent</td><td>云端 Agent + CLI + IDE 插件</td></tr>
+  <tr><td>交互模式</td><td>结对编程：Tab 补全 + Agent 模式</td><td>委托任务，全程可介入、权限关卡</td><td>派活：云端并行，产出 PR 供审阅</td></tr>
+  <tr><td>循环透明度</td><td>最高（每次改动可见可确认）</td><td>高（暴露工具调用与确认）</td><td>低（审最终 PR，不审过程）</td></tr>
+  <tr><td>典型时长</td><td>秒到分钟</td><td>分钟到小时</td><td>几十分钟 × 并行多个</td></tr>
+</table>
+
+<p>三者抢的是同一条光谱上的不同位置：深度参与 ↔ 彻底甩手。谁对取决于任务类型与用户信任度，不是技术强弱。Codex 官方还发过一篇《Unrolling the Codex agent loop》，是第 02 课的最佳延伸阅读。</p>
+
+<h2>3. 横向交付平台：Manus 与 WorkBuddy</h2>
+
+<table>
+  <tr><th></th><th>Manus</th><th>WorkBuddy（腾讯云代码助手团队）</th></tr>
+  <tr><td>定位</td><td>通用自主 Agent 先行者（2025-03 爆红）</td><td>"一人指挥，全行业专家执行"的办公工作台</td></tr>
+  <tr><td>执行方式</td><td>云端虚拟机自主执行，异步交付</td><td>多 Agent 并行、20+ 技能包、桌面/IM/小程序多端</td></tr>
+  <tr><td>护城河</td><td>通用任务的自主规划</td><td>腾讯生态 + 企业版（管理后台/数字员工）</td></tr>
+</table>
+
+<p>与千问办公同物种：隐藏循环、只给交付物、技能沉淀复用。评估难度全场最高。</p>
+
+<h2>4. 三条横切洞察</h2>
+
+<ol>
+  <li><strong>透明度光谱</strong>：Cursor（全透明）→ Claude Code → Codex 云端 → ChatGPT/Claude → Manus/WorkBuddy（全隐藏）。规律：用户越专业、任务风险越大，循环越暴露。</li>
+  <li><strong>技能生态成为共同战场</strong>：Claude Code Skills、WorkBuddy 开放技能生态兼容、Manus 任务模板、Qoder Skills——"把成功经验固化为可复用资产"已是平台标配，生态比模型难抄。</li>
+  <li><strong>评估难度排序进化速度</strong>：编程三兄弟（测试=免费评分器）&gt; 超级应用 &gt; 横向交付平台（评估靠人工堆）。</li>
+</ol>
+
+<h2>5. 对练题</h2>
+
+<p>千问办公想变得更可信：应向 Cursor 学什么（透明度）？向 Codex 学什么（交付形式）？</p>
+
+<h2>6. 资料来源</h2>
+<ul>
+  <li><a href="https://openai.com/zh-Hans-CN/index/unrolling-the-codex-agent-loop/" target="_blank">深入解析 Codex 智能体循环（OpenAI）</a></li>
+  <li><a href="https://www.codebuddy.cn/work/" target="_blank">WorkBuddy 产品页（腾讯 CodeBuddy）</a></li>
+  <li><a href="https://cloud.tencent.com/product/workbuddy-enterprise" target="_blank">WorkBuddy Enterprise（腾讯云）</a></li>
+</ul>
+
+<nav class="lesson-nav">
+  <span>← 上一课：<a href="./0005-case-anatomy-qoder-qwenwork.html">案例课 05 · Qoder 与千问办公</a></span>
+</nav>
+
+<footer class="lesson-foot">案例课 · 2026-08-07 · 解剖框架来自第 01–04 课</footer>
+
+</body>
+</html>
